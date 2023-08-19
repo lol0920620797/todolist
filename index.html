@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="./css/index.css" />
+  <title>To-do-list</title>
+</head>
+
+<body>
+
+  <!-- 主體 -->
+  <section id="app">
+    <!-- input-->
+    <header class="header">
+      <h1>阿邱邱記事本</h1>
+      <input @keyup.enter="add" v-model="toDo" placeholder="請輸入代辦事項" class="new-todo" />
+      <button @click="add" class="add">添加任務</button>
+    </header>
+    <!-- ul li -->
+    <section class="main">
+      <ul class="todo-list">
+        <li class="todo" v-for="(item, index) in list" :key="item.id">
+          <div class="view">
+            <span class="index">{{index+1}}</span> <label>{{item.title}}</label>
+            <button class="destroy" @click="del(item.id)"></button>
+          </div>
+        </li>
+      </ul>
+    </section>
+    <!-- length clear -->
+    <footer class="footer" v-show="list.length > 0">
+      <!-- 統計 -->
+      <span class="todo-count">合 计:<strong> {{list.length}} </strong></span>
+      <!-- 清空-->
+      <button @click="reSet()" class="clear-completed">
+        清空任務
+      </button>
+    </footer>
+  </section>
+
+  <!-- 底部 -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+
+    const app = new Vue({
+      el: '#app',
+      data: {
+        toDo: '',
+        list: []
+      },
+      async created() {
+        const res = await axios({
+          url: 'https://jsonplaceholder.typicode.com/todos',
+        })
+        this.list = res.data
+        console.log(this.list)
+      },
+      methods: {
+        async del(x) {
+          console.log(x)
+          this.list = this.list.filter(item => item.id !== x)
+          const res = await axios({
+            method: 'DELETE',
+            url: `https://jsonplaceholder.typicode.com/posts/${x}`,
+          })
+          console.log('刪除了', res)
+        },
+        async add() {
+          if (this.toDo.trim() === '') {
+            alert('你沒輸入任務啊!')
+            return
+          }
+          this.list.unshift({
+            id: 1,
+            title: this.toDo
+          })
+          const res = axios({
+            method: 'post',
+            url: 'https://jsonplaceholder.typicode.com/posts',
+            data: JSON.stringify({
+              title: this.toDo,
+              body: '...',
+              userId: 1,
+            }),
+            headers: {
+              'Content-type': 'application/json; charset=UTF-8',
+            },
+          })
+          console.log(res)
+          this.toDo = ''
+        },
+        reSet() {
+          this.list = []
+        }
+      }
+    })
+
+  </script>
+</body>
+
+</html>
